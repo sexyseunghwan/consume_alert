@@ -79,11 +79,14 @@ class MongoObject:
             }
 
             q_res = self.select_doc('USERGRADE', 'rolecollection', query_json)
-            
+
             res_cnt = 0
             
             for doc in q_res:
+                print(doc)
                 res_cnt += 1
+
+            print(res_cnt)
 
             if (res_cnt == 0): return False
             else: return True
