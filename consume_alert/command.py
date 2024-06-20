@@ -534,9 +534,6 @@ def command_check_fasting_time(update, context, grant_group_name):
 
     try:
 
-        print(tele_bot.user_id)
-        print(grant_group_name)
-
         if (mongo_obj.check_group_auth(tele_bot.user_id, grant_group_name)):
             
             if tele_bot.type == 1:

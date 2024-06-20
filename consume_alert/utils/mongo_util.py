@@ -22,7 +22,7 @@ class MongoObject:
             mongo_id = os.getenv("MONGO_ID")
             mongo_pw = os.getenv("MONGO_PW")
             
-            list_idx=0
+            list_idx = 0
 
             for elem in mongos_list:
                 list_idx += 1
@@ -77,16 +77,13 @@ class MongoObject:
                 "chat_group_name": group_name,
                 "chat_group_id": str(user_id)
             }
-
+            
             q_res = self.select_doc('USERGRADE', 'rolecollection', query_json)
 
             res_cnt = 0
             
             for doc in q_res:
-                print(doc)
                 res_cnt += 1
-
-            print(res_cnt)
 
             if (res_cnt == 0): return False
             else: return True
