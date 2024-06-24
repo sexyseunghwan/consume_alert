@@ -42,7 +42,8 @@ History     : 2023-05-04 Seunghwan Shin       # first create
                                                 2) Create a meeting-related index (promise_check_index) and add logic to index data into the index.
               2024-05-28 Seunghwan Shin       # Change source code to manage information such as db connection as a ".env" file.
               2024-05-30 Seunghwan Shin       # Developing a function to graph consumption trends.      
-              2024-06-02 Seunghwan Shin       # Increase the size of the consumption graph.  
+              2024-06-02 Seunghwan Shin       # Increase the size of the consumption graph. 
+              2024-06-22 Seunghwan Shin       # Increase the size of the consumption graph.  
 """
 from controller import run_app
 

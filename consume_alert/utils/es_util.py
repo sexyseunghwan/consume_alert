@@ -32,6 +32,24 @@ class EsIndexConsume:
         self.date = date
         self.cost = cost
 
+"""
+??
+"""
+class EsClassification:
+
+    def __init__(self, keyword_type, es_class_type_list):
+        self.keyword_type = keyword_type
+        self.es_class_type_list = es_class_type_list
+
+"""
+??
+"""
+class EsClassificationType:
+
+    def __init__(self, keyword, bias_value):
+        self.keyword = keyword
+        self.bias_value = bias_value
+
 
 """
 Elasticsearch related objects
@@ -182,7 +200,45 @@ class ESObject:
         return cost_obj_list
 
 
+    # 
+    def get_consume_classification_infos(self, consume_info_list):
+        
+        # 여기서 일단 종류를 가져와야 한다.
+        # 검색 객체 생성 및 집계 설정
+        s = Search(using=self.es_conn, index='consuming_index_prod_type').extra(size=0)
+        s.aggs.bucket('unique_keyword_types', 'terms', field='keyword_type', size=100)
 
+        # 쿼리 실행
+        response = s.execute()
+        key_list = [bucket.key for bucket in response.aggregations.unique_keyword_types.buckets]
+        consume_type_list = []
+
+        for keyword_type in key_list:
+            
+            elem_s = Search(using=self.es_conn, index='consuming_index_prod_type') \
+                    .query('term', keyword_type=keyword_type) \
+                    .extra(size=100)
+            
+            elem_response = elem_s.execute()
+
+            type_obj_list = [EsClassificationType(hit.keyword, hit.bias_value) for hit in elem_response]
+
+            consum_type_obj = EsClassification(keyword_type, type_obj_list)
+            consume_type_list.append(consum_type_obj)
+        
+
+        for elem in consume_type_list:
+            print(elem.keyword_type)
+
+            for inner_elem in elem.es_class_type_list:
+                print(inner_elem.keyword)
+                print(inner_elem.bias_value)
+                print("============")
+        
+
+                
+        
+            
 
     # [deprecated] Checks whether an ID with admin privileges exists.
     def check_group_auth(self, user_id, group_name):

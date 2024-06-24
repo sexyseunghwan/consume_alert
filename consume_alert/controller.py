@@ -27,7 +27,8 @@ def run_app():
                     CommandHandler('mt', lambda update, context: command_check_fasting_time(update, context, 'meal_check_info')),
                     CommandHandler('md', lambda update, context: command_delete_fasting_time(update, context, 'meal_check_info')),
                     CommandHandler('cy', lambda update, context: command_consumption_per_year(update, context, 'consume_info')),
-                    CommandHandler('pi', lambda update, context: command_promise_put(update, context, 'promise_input'))
+                    CommandHandler('pi', lambda update, context: command_promise_put(update, context, 'promise_input')),
+                    CommandHandler('ck', lambda update, context: command_promise_put(update, context, 'consume_info'))
                     ]                   
     
     for handler in handler_list:

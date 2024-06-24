@@ -310,7 +310,7 @@ def command_consumption_per_salary(update, context, grant_group_name):
         if (mongo_obj.check_group_auth(tele_bot.user_id, grant_group_name)):
             
             if tele_bot.type == 1:
-                
+
                 start_date = datetime.now(tz=korea_tz)
                 end_date = datetime.now(tz=korea_tz)
 
@@ -344,15 +344,24 @@ def command_consumption_per_salary(update, context, grant_group_name):
                 total_cost = es_obj.get_consume_total_cost('consuming_index_prod_new', formatted_start_date, formatted_end_date)
                 consume_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', formatted_start_date, formatted_end_date)
 
-                # Pre Month
-                total_cost_pre = es_obj.get_consume_total_cost('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
-                consume_pre_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
+                es_obj.get_consume_classification_infos(consume_info_list)
+
+                # for elem in consume_info_list:
+                #     print(elem.name)
+                #     print(elem.cost)
+                #     print("==========\n")
+
+                #print(consume_info_list)
+
+                # # Pre Month
+                # total_cost_pre = es_obj.get_consume_total_cost('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
+                # consume_pre_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
                 
-                calculate_cosume_res_dual(consume_info_list, total_cost, start_date, end_date, consume_pre_info_list, total_cost_pre, pre_start_date, pre_end_date)
+                # calculate_cosume_res_dual(consume_info_list, total_cost, start_date, end_date, consume_pre_info_list, total_cost_pre, pre_start_date, pre_end_date)
                 
-                tele_bot.send_message_consume(context, formatted_start_date, formatted_end_date , total_cost, consume_info_list, 10)
+                # tele_bot.send_message_consume(context, formatted_start_date, formatted_end_date , total_cost, consume_info_list, 10)
                 
-                send_image(update, context, './data/img/plot.png')
+                # send_image(update, context, './data/img/plot.png')
                 
             else:
                 tele_bot.send_message_text(context, "There is a problem with the parameter you entered. Please check again. \nEX) /cs")
@@ -764,3 +773,36 @@ def command_promise_put(update, context, grant_group_name):
 
     es_obj.conn_close()
     mongo_obj.conn_close()
+
+
+# command handler - 14: Function that identifies consumption patterns with specific words  -> /ck
+# def command_promise_put(update, context, grant_group_name):
+    
+#     tele_bot = TeleInfo(update)
+#     es_obj = ESObject()
+#     mongo_obj = MongoObject()
+#     now = datetime.now(tz=korea_tz)
+
+#     try:
+        
+#         if (mongo_obj.check_group_auth(tele_bot.user_id, grant_group_name)):
+            
+#             if tele_bot.type == 2:
+#                 ## test
+#                 a = 10
+
+
+                
+
+#             else: 
+#                 tele_bot.send_message_text(context, "The form is incorrect. Please fill out the form below. \n /pi company party*2024-02-03 19:20*jamsil station.")
+#         else:
+#             tele_bot.send_message_text(context, "The group does not have access.")
+#             raise Exception('Group {} attempted to access the "{}" permission.'.format(tele_bot.user_id, grant_group_name))
+
+
+#     except Exception as e:
+#         global_logger.error(str(e), exc_info=True)
+
+#     es_obj.conn_close()
+#     mongo_obj.conn_close()
