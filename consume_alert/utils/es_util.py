@@ -226,16 +226,15 @@ class ESObject:
             consum_type_obj = EsClassification(keyword_type, type_obj_list)
             consume_type_list.append(consum_type_obj)
         
-
+        
         for elem in consume_type_list:
             print(elem.keyword_type)
 
             for inner_elem in elem.es_class_type_list:
                 print(inner_elem.keyword)
                 print(inner_elem.bias_value)
-                print("============")
         
-
+    
                 
         
             
