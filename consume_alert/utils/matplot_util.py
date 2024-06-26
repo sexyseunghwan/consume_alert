@@ -2,6 +2,7 @@ from utils.common_util import *
 from import_data.common import *
 
 
+
 # An object containing information in a consumption trend
 class ConsumeInfoDict:
 
@@ -30,6 +31,7 @@ def parsing_consume_object(totals_cost, start_date, end_date, consume_list):
         
         # parsing into datetime objects
         dt = datetime.fromisoformat(elem_date.rstrip('Z'))
+
         # Extract date in year-month-day format
         date_only = dt.date().isoformat()
         
@@ -47,20 +49,46 @@ def parsing_consume_object(totals_cost, start_date, end_date, consume_list):
 
 
 # Function that visualizes two consumption trends
-def calculate_cosume_res_dual(consume_list, totals_cost, start_date, end_date, consume_pre_list, totals_pre_cost, pre_start_date, pre_end_date):
+def visualize_cosume_res_dual(consume_list, totals_cost, start_date, end_date, consume_pre_list, totals_pre_cost, pre_start_date, pre_end_date):
     
     consume_info = parsing_consume_object(totals_cost, start_date, end_date, consume_list)
     consume_info_pre = parsing_consume_object(totals_pre_cost, pre_start_date, pre_end_date, consume_pre_list)
     
-    draw_graph_dual(consume_info, consume_info_pre)
+    draw_line_graph_dual(consume_info, consume_info_pre)
 
 
 # Function that visualizes consumption trends
-def calculate_cosume_res_single(consume_list, totals_cost, start_date, end_date):
+def visualize_cosume_res_single(consume_list, totals_cost, start_date, end_date):
     
     consume_info = parsing_consume_object(totals_cost, start_date, end_date, consume_list)
     
     draw_graph_single(consume_info)
+
+
+# Function that graphs consumption by category.
+def visualize_consume_res_by_category(consume_type_info_list):
+
+    category_labels = [consume_type_info.keyword_type for consume_type_info in consume_type_info_list]
+    category_size_labels = [consume_type_info.keyword_cost for consume_type_info in consume_type_info_list]
+
+    draw_circle_graph(category_size_labels, category_labels, False, 140, './data/img/category_plot.png')
+
+
+
+# Function that draws a circle graph
+def draw_circle_graph(category_size_labels, category_labels, shadow, startangle, save_fig):
+
+    # Dynamic Color Array Generation
+    colors = plt.cm.viridis(np.linspace(0, 1, len(category_size_labels)))   
+
+    plt.figure(figsize=(8, 8))  # Specify graph size
+    plt.pie(category_size_labels, labels=category_labels, colors=colors, autopct='%1.1f%%', shadow=shadow, startangle=startangle)
+    plt.axis('equal')
+    
+    # Save Graphs
+    plt.savefig(save_fig)
+    plt.close()
+    
 
 
 # Formatter Function Definition
@@ -69,7 +97,7 @@ def thousands_formatter(x, pos):
 
 
 # Function that draws a graph
-def draw_graph(plt, title, x_label, y_label, save_fig):
+def draw_line_graph(plt, title, x_label, y_label, save_fig):
 
     # y-axis label formatting
     formatter = FuncFormatter(thousands_formatter)
@@ -85,7 +113,7 @@ def draw_graph(plt, title, x_label, y_label, save_fig):
 
 
 # Function that plots a graph of two consumption trends
-def draw_graph_dual(consume_info_1, consume_info_2):
+def draw_line_graph_dual(consume_info_1, consume_info_2):
     
     longer_len = 0
 
@@ -111,7 +139,8 @@ def draw_graph_dual(consume_info_1, consume_info_2):
     plt.plot(x, consume_info_1.consume_res_list, color='red', label="[{} ~ {}]".format(consume_info_1.start_date, consume_info_1.end_date))
     plt.plot(x, consume_info_2.consume_res_list, color='black', label="[{} ~ {}]".format(consume_info_2.start_date, consume_info_2.end_date))
 
-    draw_graph(plt, "[{} ~ {}] {} won".format(consume_info_1.start_date, consume_info_1.end_date, consume_info_1.totals_cost), 'Date', 'Consume Cost', './data/img/plot.png')
+    draw_line_graph(plt, "[{} ~ {}] {} won".format(consume_info_1.start_date, consume_info_1.end_date, consume_info_1.totals_cost), 'Date', 'Consume Cost', './data/img/plot.png')
+
 
 
 # Function that plots a graph of a consumption trend
@@ -125,4 +154,4 @@ def draw_graph_single(consume_info):
     plt.figure(figsize=(10,7))
     plt.plot(x, consume_info.consume_res_list, color='red', label="[{} ~ {}]".format(consume_info.start_date, consume_info.end_date))
 
-    draw_graph(plt, "[{} ~ {}] {} won".format(consume_info.start_date, consume_info.end_date, consume_info.totals_cost), 'Date', 'Consume Cost', './data/img/plot.png')
+    draw_line_graph(plt, "[{} ~ {}] {} won".format(consume_info.start_date, consume_info.end_date, consume_info.totals_cost), 'Date', 'Consume Cost', './data/img/plot.png')

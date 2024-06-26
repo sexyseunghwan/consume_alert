@@ -9,6 +9,7 @@ class TeleInfo:
         self.update = update  
         self.get_tele_bot_pre_check()
 
+    
     def get_tele_bot_pre_check(self):
         self.user_id = self.update.effective_chat.id
         self.user_text = self.update.message.text
@@ -81,7 +82,7 @@ class TeleInfo:
 
     # To solve the "ERROR: Message is too long" problem, modify the source code 
     # so that the telegram bot cuts off text of a certain length and sends it to the telegram chat room.
-    def send_message_consume(self, context, start_dt , end_dt, total_cost, consume_info_list, cut_cnt):
+    def send_message_consume(self, start_dt , end_dt, total_cost, consume_info_list, cut_cnt):
         
         consume_list_len = len(consume_info_list)
         loop_cnt = 0
@@ -111,7 +112,50 @@ class TeleInfo:
                 send_text += 'cost : {:,}\n'.format(consume_info_list[j].cost) 
             
             self.send_message_confirm(send_text)
+
+    
+    # Function that sends consumption information for each category to a specific telegram group through a telegram bot.
+    def send_message_consume_category(self, start_dt , end_dt, total_cost, consume_type_info_list, cut_cnt):
+
+        consume_type_info_list.sort(key=lambda x: x.keyword_cost, reverse=True)
+
+        category_dict_list_len = len(consume_type_info_list)
+        loop_cnt = 0
+        consume_q = category_dict_list_len // cut_cnt
+        consume_r = category_dict_list_len % cut_cnt
+        
+        if consume_r != 0:
+            loop_cnt = consume_q + 1
+        else:
+            loop_cnt = consume_q
+
+        if category_dict_list_len == 0:
+            self.send_message_confirm("The money you spent from [{} ~ {}] is [ {} won ] \n".format(start_dt, end_dt, total_cost))
+        
+        total_cost_float = float(total_cost.replace(",",""))
+
+        for i in range(0, loop_cnt):  
             
+            send_text = ""
+            end_idx = min(category_dict_list_len, (i+1)*cut_cnt)
+
+            if (i == 0):
+                send_text += "The money you spent from [{} ~ {}] is [ {} won ] \n=========[DETAIL]=========\n".format(start_dt, end_dt, total_cost)
+            
+            for j in range(cut_cnt*i, end_idx):
+                
+                consume_per = round((float(consume_type_info_list[j].keyword_cost) / total_cost_float) * 100.0, 1)
+                
+                send_text += '---------------------------------\n'
+                send_text += 'category name : {}\n'.format(consume_type_info_list[j].keyword_type)
+                send_text += 'cost : {:,}\n'.format(consume_type_info_list[j].keyword_cost) 
+                send_text += 'cost(%) : {}%\n'.format(consume_per) 
+            
+            self.send_message_confirm(send_text)
+
+            
+
+
     
     # Function that sends a message about the amount spent per year
     def send_message_comsume_per_year(self, context, start_dt , end_dt, total_cost, consum_obj_list):

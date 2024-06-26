@@ -33,7 +33,7 @@ class EsIndexConsume:
         self.cost = cost
 
 """
-??
+Class that have information about elements by keyword_type
 """
 class EsClassification:
 
@@ -42,13 +42,22 @@ class EsClassification:
         self.es_class_type_list = es_class_type_list
 
 """
-??
+Class of information with keywords and their bias
 """
 class EsClassificationType:
 
     def __init__(self, keyword, bias_value):
         self.keyword = keyword
         self.bias_value = bias_value
+
+"""
+Class with each consumption classification name and total consumption information
+"""
+class EsConsumeTypeInfo:
+
+    def __init__(self, keyword_type, keyword_cost):
+        self.keyword_type = keyword_type
+        self.keyword_cost = keyword_cost
 
 
 """
@@ -200,15 +209,13 @@ class ESObject:
         return cost_obj_list
 
 
-    # 
+    
+    # Function that can identify consumption details by consumption classification.
     def get_consume_classification_infos(self, consume_info_list):
         
-        # 여기서 일단 종류를 가져와야 한다.
-        # 검색 객체 생성 및 집계 설정
         s = Search(using=self.es_conn, index='consuming_index_prod_type').extra(size=0)
         s.aggs.bucket('unique_keyword_types', 'terms', field='keyword_type', size=100)
 
-        # 쿼리 실행
         response = s.execute()
         key_list = [bucket.key for bucket in response.aggregations.unique_keyword_types.buckets]
         consume_type_list = []
@@ -226,19 +233,61 @@ class ESObject:
             consum_type_obj = EsClassification(keyword_type, type_obj_list)
             consume_type_list.append(consum_type_obj)
         
+        total_dict = {}
         
         for elem in consume_type_list:
-            print(elem.keyword_type)
-
-            for inner_elem in elem.es_class_type_list:
-                print(inner_elem.keyword)
-                print(inner_elem.bias_value)
+            total_dict[elem.keyword_type] = 0
         
+        for consume_elem in consume_info_list:
+            
+            type_dict = {}
+
+            consume_name = consume_elem.name
+            consume_cost = consume_elem.cost
+            
+            for elem in consume_type_list:
+                type_dict[elem.keyword_type] = 0
+            
+            for type in consume_type_list:
+                type_name = type.keyword_type
+                
+                for comparison in type.es_class_type_list:
+                    comp_keyword = comparison.keyword
+                    comp_bias = comparison.bias_value
+
+                    if comp_keyword.lower() in consume_name.lower():
+                        type_dict[type_name] = int(type_dict[type_name]) + int(comp_bias)
+            
+            max_type_name = ""
+            max_bias = 0
+            
+            for key, value in type_dict.items():
+                type_name = key
+                type_bias = value
+
+                if (type_bias > max_bias):
+                    max_type_name = type_name
+                    max_bias = type_bias
+            
+            if (max_type_name != "" and max_bias > 0):
+                total_dict[max_type_name] = int(total_dict[max_type_name]) + int(consume_cost)   
+            else:
+                total_dict["etc"] = total_dict["etc"] + consume_cost     
+        
+        
+        #total_dict = {key: value for key, value in total_dict.items() if value != 0}
+        
+        consume_type_info_list = []
+
+        for key, value in total_dict.items():
+            if value != 0:
+                consume_type_info = EsConsumeTypeInfo(key, value)
+                consume_type_info_list.append(consume_type_info)
+
+        return consume_type_info_list
     
                 
-        
-            
-
+    
     # [deprecated] Checks whether an ID with admin privileges exists.
     def check_group_auth(self, user_id, group_name):
 

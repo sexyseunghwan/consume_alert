@@ -2,6 +2,10 @@ from utils.common_util import *
 from command import *
 from config import global_logger
 
+# Graph related font settings. - Globally set.
+font_prop = font_manager.FontProperties(fname="./data/font/BMDOHYEON_ttf.ttf").get_name()
+plt.rc('font', family=font_prop)
+
 def run_app():
 
     load_dotenv()

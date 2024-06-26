@@ -166,11 +166,19 @@ def command_consumption_per_mon(update, context, grant_group_name):
             pre_total_cost = es_obj.get_consume_total_cost('consuming_index_prod_new', pre_start_date.strftime("%Y-%m-%dT%H:%M:%SZ"), pre_end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
             pre_consume_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', pre_start_date.strftime("%Y-%m-%dT%H:%M:%SZ"), pre_end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
             
-            calculate_cosume_res_dual(consume_info_list, total_cost, start_date, end_date, pre_consume_info_list, pre_total_cost, pre_start_date, pre_end_date)
-            
-            tele_bot.send_message_consume(context, start_date, end_date , total_cost, consume_info_list, 10)
+            visualize_cosume_res_dual(consume_info_list, total_cost, start_date, end_date, pre_consume_info_list, pre_total_cost, pre_start_date, pre_end_date)
+
+            tele_bot.send_message_consume(start_date, end_date , total_cost, consume_info_list, 10)
 
             send_image(update, context, './data/img/plot.png')
+
+            # Function that checks consumption by category.
+            category_dict = es_obj.get_consume_classification_infos(consume_info_list)
+            visualize_consume_res_by_category(category_dict)
+            send_image(update, context, './data/img/category_plot.png')
+            tele_bot.send_message_consume_category(start_date, end_date , total_cost, category_dict, 10)
+            
+            
 
         else:
             tele_bot.send_message_text(context, "The group does not have access.")
@@ -224,11 +232,16 @@ def command_consumption_per_term(update, context, grant_group_name):
                     total_cost = es_obj.get_consume_total_cost('consuming_index_prod_new', formatted_start_date, formatted_end_date)
                     consume_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', formatted_start_date, formatted_end_date)
                     
-                    calculate_cosume_res_single(consume_info_list, total_cost, start_date, end_date)
+                    visualize_cosume_res_single(consume_info_list, total_cost, start_date, end_date)
 
-                    tele_bot.send_message_consume(context, start_date, end_date , total_cost, consume_info_list, 10)
+                    tele_bot.send_message_consume(start_date, end_date , total_cost, consume_info_list, 10)
 
                     send_image(update, context, './data/img/plot.png')
+
+                    category_dict = es_obj.get_consume_classification_infos(consume_info_list)
+                    visualize_consume_res_by_category(category_dict)
+                    send_image(update, context, './data/img/category_plot.png')
+                    tele_bot.send_message_consume_category(start_date, end_date , total_cost, category_dict, 10)
 
             else:
                 tele_bot.send_message_text(context, "There is a problem with the parameter you entered. Please check again. \nEX) /ctr 2023.07.07-2023.08.01")
@@ -281,7 +294,7 @@ def command_consumption_per_today(update, context, grant_group_name):
             total_cost = es_obj.get_consume_total_cost('consuming_index_prod_new', today_start.strftime("%Y-%m-%dT%H:%M:%SZ"), today_end.strftime("%Y-%m-%dT%H:%M:%SZ"))
             consume_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', today_start.strftime("%Y-%m-%dT%H:%M:%SZ"), today_end.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
-            tele_bot.send_message_consume(context, today_start.strftime("%Y-%m-%dT%H:%M:%SZ"), today_end.strftime("%Y-%m-%dT%H:%M:%SZ") , total_cost, consume_info_list, 10)
+            tele_bot.send_message_consume(today_start.strftime("%Y-%m-%dT%H:%M:%SZ"), today_end.strftime("%Y-%m-%dT%H:%M:%SZ") , total_cost, consume_info_list, 10)
 
         else:
             tele_bot.send_message_text(context, "The group does not have access.")
@@ -346,22 +359,20 @@ def command_consumption_per_salary(update, context, grant_group_name):
 
                 es_obj.get_consume_classification_infos(consume_info_list)
 
-                # for elem in consume_info_list:
-                #     print(elem.name)
-                #     print(elem.cost)
-                #     print("==========\n")
+                # Pre Month
+                total_cost_pre = es_obj.get_consume_total_cost('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
+                consume_pre_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
+                
+                visualize_cosume_res_dual(consume_info_list, total_cost, start_date, end_date, consume_pre_info_list, total_cost_pre, pre_start_date, pre_end_date)
+                
+                tele_bot.send_message_consume(formatted_start_date, formatted_end_date , total_cost, consume_info_list, 10)
+                
+                send_image(update, context, './data/img/plot.png')
 
-                #print(consume_info_list)
-
-                # # Pre Month
-                # total_cost_pre = es_obj.get_consume_total_cost('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
-                # consume_pre_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', formatted_pre_start_date, formatted_pre_end_date)
-                
-                # calculate_cosume_res_dual(consume_info_list, total_cost, start_date, end_date, consume_pre_info_list, total_cost_pre, pre_start_date, pre_end_date)
-                
-                # tele_bot.send_message_consume(context, formatted_start_date, formatted_end_date , total_cost, consume_info_list, 10)
-                
-                # send_image(update, context, './data/img/plot.png')
+                category_dict = es_obj.get_consume_classification_infos(consume_info_list)
+                visualize_consume_res_by_category(category_dict)
+                send_image(update, context, './data/img/category_plot.png')
+                tele_bot.send_message_consume_category(start_date, end_date , total_cost, category_dict, 10)
                 
             else:
                 tele_bot.send_message_text(context, "There is a problem with the parameter you entered. Please check again. \nEX) /cs")
@@ -420,7 +431,12 @@ def command_consumption_per_week(update, context, grant_group_name):
             total_cost = es_obj.get_consume_total_cost('consuming_index_prod_new', start_of_week_day, end_of_week_day)
             consume_info_list = es_obj.get_consume_info_detail_list('consuming_index_prod_new', start_of_week_day, end_of_week_day)
 
-            tele_bot.send_message_consume(context, start_of_week_day, end_of_week_day , total_cost, consume_info_list, 10)
+            tele_bot.send_message_consume(start_of_week_day, end_of_week_day , total_cost, consume_info_list, 10)
+
+            consume_type_info_list = es_obj.get_consume_classification_infos(consume_info_list)
+            visualize_consume_res_by_category(consume_type_info_list)
+            send_image(update, context, './data/img/category_plot.png')
+            tele_bot.send_message_consume_category(start_of_week_day, start_of_week_day , total_cost, consume_type_info_list, 10)
         
         else:
             tele_bot.send_message_text(context, "The group does not have access.")

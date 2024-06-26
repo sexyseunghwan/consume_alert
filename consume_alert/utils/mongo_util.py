@@ -49,7 +49,7 @@ class MongoObject:
         self.m_conn.close()
     
     
-    #
+    # Functions that import specific documents using MongoDB
     def select_doc(self, db_name, collection_name, query_json):
         
         mongo_clent = None
@@ -69,7 +69,7 @@ class MongoObject:
         return query_res
     
     
-    #
+    # Use MongoDB to determine whether the telegram group can execute the command.
     def check_group_auth(self, user_id, group_name):
 
         try:
